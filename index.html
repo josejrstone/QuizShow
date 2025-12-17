@@ -282,11 +282,174 @@
     <script>
         // --- BANCO DE DADOS (Exemplo compactado) ---
         const questionsDB = [
-            { t: "Capital do Tocantins?", options: ["Palmas", "Belém", "Goiânia", "Macapá"], a: 0, d: "Fácil" },
-            { t: "Autor de Dom Casmurro?", options: ["Jorge Amado", "Machado de Assis", "Clarice", "Lobato"], a: 1, d: "Fácil" },
-            { t: "Moeda antes do Real?", options: ["Cruzeiro Real", "Cruzado", "Cruzeiro", "Todas"], a: 3, d: "Média" },
-            { t: "Planeta vermelho?", options: ["Marte", "Júpiter", "Saturno", "Vênus"], a: 0, d: "Fácil" },
-            { t: "Sigla da ONU?", options: ["Org. Nações Unidas", "Org. Nacional", "Obras Unidas", "N/A"], a: 0, d: "Fácil" },
+            { t: "Qual é a capital do estado do Tocantins?", options: ["Palmas", "Belém", "Goiânia", "Macapá"], a: 0, d: "Fácil" },
+            { t: "Quem escreveu 'Dom Casmurro'?", options: ["Jorge Amado", "Machado de Assis", "Clarice Lispector", "Monteiro Lobato"], a: 1, d: "Fácil" },
+            { t: "Qual moeda era utilizada no Brasil antes do Real?", options: ["Cruzeiro Real", "Cruzado", "Cruzeiro", "Todas as anteriores"], a: 3, d: "Média" },
+            { t: "Quantos estados tem o Brasil?", options: ["26 + DF", "25 + DF", "27 + DF", "26"], a: 0, d: "Fácil" },
+            { t: "Qual é o maior planeta do Sistema Solar?", options: ["Terra", "Marte", "Júpiter", "Saturno"], a: 2, d: "Fácil" },
+            { t: "Em que ano ocorreu a Proclamação da República no Brasil?", options: ["1822", "1889", "1964", "1500"], a: 1, d: "Média" },
+            { t: "Qual é o elemento químico representado pela letra O?", options: ["Ouro", "Oxigênio", "Ósmio", "Prata"], a: 1, d: "Fácil" },
+            { t: "Qual destas bandas NÃO é brasileira?", options: ["Legião Urbana", "Paralamas do Sucesso", "Maná", "Skank"], a: 2, d: "Fácil" },
+            { t: "Quem pintou 'Abaporu'?", options: ["Tarsila do Amaral", "Anita Malfatti", "Di Cavalcanti", "Cândido Portinari"], a: 0, d: "Média" },
+            { t: "Qual é o rio mais extenso do mundo?", options: ["Rio Nilo", "Rio Amazonas", "Rio Mississipi", "Rio Yangtzé"], a: 1, d: "Média" },
+            { t: "O que comemora-se no dia 7 de Setembro?", options: ["Proclamação da República", "Dia do Trabalho", "Independência do Brasil", "Dia da Bandeira"], a: 2, d: "Fácil" },
+            { t: "Qual a fórmula química da água?", options: ["H2O", "CO2", "O2", "NaCl"], a: 0, d: "Fácil" },
+            { t: "Quem foi o primeiro presidente do Brasil?", options: ["Getúlio Vargas", "Deodoro da Fonseca", "Prudente de Morais", "Floriano Peixoto"], a: 1, d: "Média" },
+            { t: "Qual é o coletivo de lobos?", options: ["Matilha", "Rebanho", "Cardume", "Manada"], a: 0, d: "Fácil" },
+            { t: "Onde fica o Monte Roraima?", options: ["Divisa Brasil/Venezuela/Guiana", "Divisa Brasil/Argentina", "Minas Gerais", "Amazonas"], a: 0, d: "Difícil" },
+            { t: "Quantos ossos tem o corpo humano adulto?", options: ["206", "300", "150", "210"], a: 0, d: "Média" },
+            { t: "Quem descobriu o Brasil?", options: ["Cristóvão Colombo", "Pedro Álvares Cabral", "Vasco da Gama", "Américo Vespúcio"], a: 1, d: "Fácil" },
+            { t: "Qual o nome popular do cloreto de sódio?", options: ["Açúcar", "Sal de cozinha", "Vinagre", "Bicarbonato"], a: 1, d: "Média" },
+            { t: "Em qual região fica o estado da Bahia?", options: ["Norte", "Sudeste", "Centro-Oeste", "Nordeste"], a: 3, d: "Fácil" },
+            { t: "Qual personagem da Turma da Mônica não gosta de banho?", options: ["Cebolinha", "Mônica", "Cascão", "Magali"], a: 2, d: "Fácil" },
+            { t: "Qual a montanha mais alta do Brasil?", options: ["Pico da Neblina", "Pico da Bandeira", "Monte Roraima", "Pico do Paraná"], a: 0, d: "Difícil" },
+            { t: "Que país sediou a Copa do Mundo de 2014?", options: ["África do Sul", "Brasil", "Alemanha", "Rússia"], a: 1, d: "Fácil" },
+            { t: "O que é um 'brotinho' na gíria antiga?", options: ["Uma planta pequena", "Uma moça bonita", "Um pão pequeno", "Um tipo de doce"], a: 1, d: "Difícil" },
+            { t: "Qual é a cor da caixa preta do avião?", options: ["Preta", "Laranja", "Vermelha", "Azul"], a: 1, d: "Média" },
+            { t: "Quantos segundos há em duas horas?", options: ["3600", "7200", "6000", "120"], a: 1, d: "Média" },
+            { t: "Quem é o Rei do Futebol?", options: ["Maradona", "Zico", "Pelé", "Ronaldo"], a: 2, d: "Fácil" },
+            { t: "O que significa a sigla ONU?", options: ["Organização Não Universal", "Organização das Nações Unidas", "Obras Nacionais Unidas", "Ordem Natural Universal"], a: 1, d: "Fácil" },
+            { t: "Qual animal representa o símbolo da medicina?", options: ["Cobra", "Leão", "Águia", "Cachorro"], a: 0, d: "Média" },
+            { t: "Em qual continente fica o Egito?", options: ["Ásia", "África", "Europa", "América"], a: 1, d: "Fácil" },
+            { t: "Qual é a raiz quadrada de 144?", options: ["10", "11", "12", "14"], a: 2, d: "Média" },
+            { t: "Quem foi Ayrton Senna?", options: ["Jogador de futebol", "Piloto de F1", "Cantor", "Ator"], a: 1, d: "Fácil" },
+            { t: "Qual destes é um mamífero que bota ovo?", options: ["Ornitorrinco", "Morcego", "Baleia", "Canguru"], a: 0, d: "Difícil" },
+            { t: "Qual é a capital dos Estados Unidos?", options: ["Nova York", "Los Angeles", "Washington D.C.", "Miami"], a: 2, d: "Fácil" },
+            { t: "O que é 'caju'?", options: ["Fruta", "Pseudofruto", "Legume", "Raiz"], a: 1, d: "Difícil" },
+            { t: "Quantos lados tem um hexágono?", options: ["5", "6", "7", "8"], a: 1, d: "Fácil" },
+            { t: "Quem inventou o avião (segundo os brasileiros)?", options: ["Irmãos Wright", "Santos Dumont", "Leonardo da Vinci", "Graham Bell"], a: 1, d: "Fácil" },
+            { t: "Qual a língua falada em Angola?", options: ["Inglês", "Espanhol", "Francês", "Português"], a: 3, d: "Média" },
+            { t: "O que é Vatapá?", options: ["Dança", "Prato típico", "Cidade", "Rio"], a: 1, d: "Fácil" },
+            { t: "Qual o planeta mais próximo do Sol?", options: ["Vênus", "Mercúrio", "Terra", "Marte"], a: 1, d: "Média" },
+            { t: "Quem pintou a 'Mona Lisa'?", options: ["Michelangelo", "Leonardo da Vinci", "Donatello", "Rafael"], a: 1, d: "Fácil" },
+            { t: "Qual é o maior animal terrestre?", options: ["Elefante Africano", "Girafa", "Rinoceronte", "Hipopótamo"], a: 0, d: "Média" },
+            { t: "Em que ano o homem pisou na Lua?", options: ["1959", "1969", "1979", "1989"], a: 1, d: "Média" },
+            { t: "Qual é a capital da França?", options: ["Londres", "Berlim", "Roma", "Paris"], a: 3, d: "Fácil" },
+            { t: "Quantos jogadores tem um time de vôlei em quadra?", options: ["5", "6", "7", "11"], a: 1, d: "Média" },
+            { t: "Qual é o maior órgão do corpo humano?", options: ["Fígado", "Coração", "Pele", "Pulmão"], a: 2, d: "Média" },
+            { t: "O que significa 'baleiro' no futebol?", options: ["Goleiro ruim", "Atacante rápido", "Aquele que chuta forte", "Aquele que faz firula"], a: 3, d: "Difícil" }
+            // --- GEOGRAFIA ---
+    { t: "Qual é a capital da Austrália?", options: ["Sydney", "Melbourne", "Canberra", "Perth"], a: 2, d: "Média" },
+    { t: "Qual país tem o formato de uma bota?", options: ["Portugal", "Itália", "México", "Japão"], a: 1, d: "Fácil" },
+    { t: "O deserto do Saara fica em qual continente?", options: ["Ásia", "América do Sul", "África", "Oceania"], a: 2, d: "Fácil" },
+    { t: "Qual é o oceano que banha o litoral brasileiro?", options: ["Oceano Pacífico", "Oceano Índico", "Oceano Atlântico", "Oceano Ártico"], a: 2, d: "Fácil" },
+    { t: "Machu Picchu fica em qual país?", options: ["Colômbia", "Bolívia", "Peru", "Chile"], a: 2, d: "Média" },
+    { t: "Qual é o menor país do mundo?", options: ["Mônaco", "Vaticano", "Malta", "San Marino"], a: 1, d: "Média" },
+    { t: "Tóquio é a capital de qual país?", options: ["Coreia do Sul", "China", "Japão", "Tailândia"], a: 2, d: "Fácil" },
+    { t: "Qual é a moeda oficial do Reino Unido?", options: ["Euro", "Dólar", "Libra Esterlina", "Franco"], a: 2, d: "Média" },
+
+    // --- HISTÓRIA ---
+    { t: "Quem foi o líder nazista durante a Segunda Guerra Mundial?", options: ["Mussolini", "Adolf Hitler", "Stalin", "Churchill"], a: 1, d: "Fácil" },
+    { t: "Em que ano terminou a Segunda Guerra Mundial?", options: ["1945", "1939", "1918", "1960"], a: 0, d: "Média" },
+    { t: "Quem libertou os escravos no Brasil?", options: ["D. Pedro I", "D. Pedro II", "Princesa Isabel", "Zumbi dos Palmares"], a: 2, d: "Fácil" },
+    { t: "Qual era o deus do sol na mitologia egípcia?", options: ["Anúbis", "Hórus", "Rá", "Osíris"], a: 2, d: "Difícil" },
+    { t: "A Revolução Francesa começou em qual século?", options: ["Século XVII", "Século XVIII", "Século XIX", "Século XX"], a: 1, d: "Difícil" },
+    { t: "Quem foi o primeiro homem a viajar para o espaço?", options: ["Neil Armstrong", "Buzz Aldrin", "Yuri Gagarin", "Marcos Pontes"], a: 2, d: "Média" },
+
+    // --- CIÊNCIAS E NATUREZA ---
+    { t: "Qual planeta é conhecido como o 'Planeta Vermelho'?", options: ["Júpiter", "Marte", "Saturno", "Vênus"], a: 1, d: "Fácil" },
+    { t: "O que as abelhas produzem?", options: ["Leite", "Seda", "Mel", "Algodão"], a: 2, d: "Fácil" },
+    { t: "Qual é o símbolo químico do Ferro?", options: ["Fe", "Fr", "F", "Ir"], a: 0, d: "Média" },
+    { t: "Qual gás nós respiramos para sobreviver?", options: ["Hélio", "Gás Carbônico", "Oxigênio", "Nitrogênio"], a: 2, d: "Fácil" },
+    { t: "Quantos pares de costelas um ser humano normalmente tem?", options: ["10", "12", "14", "8"], a: 1, d: "Difícil" },
+    { t: "O bambu é um tipo de:", options: ["Árvore", "Arbusto", "Grama", "Fungo"], a: 2, d: "Difícil" },
+    { t: "Qual é a velocidade da luz?", options: ["300.000 km/s", "150.000 km/s", "1.000 km/s", "30.000 km/s"], a: 0, d: "Difícil" },
+
+    // --- CULTURA POP E ENTRETENIMENTO ---
+    { t: "Quem é o criador do Mickey Mouse?", options: ["Walt Disney", "Stan Lee", "Steven Spielberg", "Tim Burton"], a: 0, d: "Fácil" },
+    { t: "Qual super-herói tem como fraqueza a Criptonita?", options: ["Batman", "Homem-Aranha", "Superman", "Flash"], a: 2, d: "Fácil" },
+    { t: "Em 'O Senhor dos Anéis', o que Frodo deve destruir?", options: ["Uma espada", "Um anel", "Uma coroa", "Um livro"], a: 1, d: "Fácil" },
+    { t: "Qual série de livros foi escrita por J.K. Rowling?", options: ["Crepúsculo", "Percy Jackson", "Harry Potter", "Jogos Vorazes"], a: 2, d: "Fácil" },
+    { t: "Qual o nome do encanador mais famoso dos videogames?", options: ["Luigi", "Sonic", "Mario", "Link"], a: 2, d: "Fácil" },
+    { t: "Quem canta o hit 'Show das Poderosas'?", options: ["Ivete Sangalo", "Anitta", "Ludmilla", "Iza"], a: 1, d: "Fácil" },
+    { t: "Qual filme ganhou o Oscar de Melhor Filme em 2020 (o primeiro em língua não inglesa)?", options: ["1917", "Coringa", "Parasita", "Era uma vez em Hollywood"], a: 2, d: "Difícil" },
+
+    // --- ESPORTES ---
+    { t: "Quantos minutos dura uma partida de futebol profissional?", options: ["60", "90", "100", "80"], a: 1, d: "Fácil" },
+    { t: "Qual país é conhecido por ter criado o Judô?", options: ["China", "Coreia", "Japão", "Tailândia"], a: 2, d: "Média" },
+    { t: "Em qual esporte se usa uma raquete e uma peteca?", options: ["Tênis", "Badminton", "Squash", "Ping Pong"], a: 1, d: "Média" },
+    { t: "Onde foram realizados os Jogos Olímpicos de 2016?", options: ["Londres", "Tóquio", "Rio de Janeiro", "Pequim"], a: 2, d: "Fácil" },
+
+    // --- TECNOLOGIA ---
+    { t: "Quem fundou a Microsoft?", options: ["Steve Jobs", "Bill Gates", "Mark Zuckerberg", "Elon Musk"], a: 1, d: "Média" },
+    { t: "Qual destas empresas fabrica o iPhone?", options: ["Samsung", "Apple", "Nokia", "Motorola"], a: 1, d: "Fácil" },
+    { t: "O que significa 'WWW' na internet?", options: ["World Wide Web", "Web World Wide", "World Web Wan", "Wide World Web"], a: 0, d: "Média" },
+
+    // --- GERAIS E CURIOSIDADES ---
+    { t: "Quantos anos tem um século?", options: ["10", "50", "100", "1000"], a: 2, d: "Fácil" },
+    { t: "Qual é a cor da mistura de azul com amarelo?", options: ["Roxo", "Laranja", "Verde", "Marrom"], a: 2, d: "Fácil" },
+    { t: "O que estuda a botânica?", options: ["Animais", "Rochas", "Plantas", "Estrelas"], a: 2, d: "Média" },
+    { t: "Quantos signos tem o zodíaco?", options: ["10", "11", "12", "13"], a: 2, d: "Fácil" },
+    { t: "Qual animal é conhecido como o 'Rei da Selva'?", options: ["Tigre", "Elefante", "Gorila", "Leão"], a: 3, d: "Fácil" },
+    { t: "Em qual país se originou o macarrão?", options: ["Itália", "China", "França", "Brasil"], a: 1, d: "Difícil" },
+    { t: "Qual é a língua mais falada do mundo (nativos)?", options: ["Inglês", "Espanhol", "Mandarim", "Hindi"], a: 2, d: "Média" },
+    { t: "Quem pintou o teto da Capela Sistina?", options: ["Da Vinci", "Michelangelo", "Donatello", "Rafael"], a: 1, d: "Difícil" },
+    { t: "Qual o maior estado brasileiro em extensão territorial?", options: ["Minas Gerais", "Mato Grosso", "Pará", "Amazonas"], a: 3, d: "Média" },
+    { t: "Qual instrumento é usado para medir a temperatura?", options: ["Barômetro", "Termômetro", "Velocímetro", "Anemômetro"], a: 1, d: "Fácil" },
+    { t: "O que é um 'Haicai'?", options: ["Uma luta", "Um poema japonês", "Uma comida", "Uma roupa"], a: 1, d: "Difícil" },
+    { t: "Qual destes não é um animal vertebrado?", options: ["Sapo", "Minhoca", "Peixe", "Cachorro"], a: 1, d: "Média" }
+        { t: "Qual é a capital da Argentina?", options: ["Buenos Aires", "Rosário", "Córdoba", "Mendoza"], a: 0, d: "Fácil" },
+    { t: "Em qual cidade fica a Estátua da Liberdade?", options: ["Washington", "Nova York", "Los Angeles", "Chicago"], a: 1, d: "Fácil" },
+    { t: "Qual é o país mais populoso do mundo?", options: ["Rússia", "Índia", "China", "Estados Unidos"], a: 1, d: "Média" }, // (Nota: A Índia ultrapassou a China recentemente)
+    { t: "Onde fica a Torre Eiffel?", options: ["Londres", "Berlim", "Roma", "Paris"], a: 3, d: "Fácil" },
+    { t: "Qual é a capital de Minas Gerais?", options: ["Uberlândia", "Ouro Preto", "Belo Horizonte", "Juiz de Fora"], a: 2, d: "Fácil" },
+    { t: "Qual país é famoso pelos seus cangurus?", options: ["Áustria", "Nova Zelândia", "Austrália", "África do Sul"], a: 2, d: "Fácil" },
+    { t: "O Canal do Panamá liga quais oceanos?", options: ["Atlântico e Índico", "Atlântico e Pacífico", "Pacífico e Ártico", "Índico e Pacífico"], a: 1, d: "Difícil" },
+    { t: "Qual é a língua oficial do México?", options: ["Mexicano", "Inglês", "Português", "Espanhol"], a: 3, d: "Fácil" },
+
+    // --- HISTÓRIA GERAL E DO BRASIL ---
+    { t: "Quem foi o primeiro homem a pisar na Lua?", options: ["Yuri Gagarin", "Neil Armstrong", "Buzz Aldrin", "Michael Collins"], a: 1, d: "Média" },
+    { t: "Quem disse a frase 'Independência ou Morte'?", options: ["Tiradentes", "Dom Pedro I", "Dom Pedro II", "Deodoro da Fonseca"], a: 1, d: "Fácil" },
+    { t: "Em que ano começou a Primeira Guerra Mundial?", options: ["1914", "1918", "1939", "1945"], a: 0, d: "Difícil" },
+    { t: "Qual civilização construiu as pirâmides?", options: ["Romanos", "Gregos", "Egípcios", "Maias"], a: 2, d: "Fácil" },
+    { t: "Quem foi o presidente do Brasil responsável pela construção de Brasília?", options: ["Getúlio Vargas", "Juscelino Kubitschek", "Jânio Quadros", "João Goulart"], a: 1, d: "Média" },
+    { t: "Qual era o navegador que comandava a frota que descobriu o Brasil?", options: ["Vasco da Gama", "Pedro Álvares Cabral", "Cristóvão Colombo", "Bartolomeu Dias"], a: 1, d: "Fácil" },
+
+    // --- CIÊNCIAS (QUÍMICA, FÍSICA, BIOLOGIA) ---
+    { t: "Qual é o único metal líquido à temperatura ambiente?", options: ["Ouro", "Mercúrio", "Prata", "Chumbo"], a: 1, d: "Média" },
+    { t: "Qual parte da planta é responsável pela fotossíntese?", options: ["Raiz", "Caule", "Folha", "Flor"], a: 2, d: "Fácil" },
+    { t: "Qual é o planeta dos anéis?", options: ["Júpiter", "Urano", "Saturno", "Netuno"], a: 2, d: "Fácil" },
+    { t: "O que o panda gigante come principalmente?", options: ["Carne", "Peixe", "Bambu", "Frutas"], a: 2, d: "Fácil" },
+    { t: "Qual é o animal mais rápido do mundo (terrestre)?", options: ["Leão", "Cavalo", "Guepardo", "Tigre"], a: 2, d: "Média" },
+    { t: "Qual é a fórmula do gás carbônico?", options: ["CO", "CO2", "O2", "H2O"], a: 1, d: "Média" },
+    { t: "O que é medido em 'Anos-Luz'?", options: ["Tempo", "Distância", "Luminosidade", "Velocidade"], a: 1, d: "Difícil" },
+    { t: "Qual tipo de sangue é considerado doador universal?", options: ["A Positivo", "AB Negativo", "O Negativo", "O Positivo"], a: 2, d: "Difícil" },
+
+    // --- LITERATURA E ARTES ---
+    { t: "Quem escreveu 'O Sítio do Picapau Amarelo'?", options: ["Ziraldo", "Ruth Rocha", "Monteiro Lobato", "Ana Maria Machado"], a: 2, d: "Fácil" },
+    { t: "Romeu e Julieta é uma obra de qual autor?", options: ["Charles Dickens", "William Shakespeare", "Victor Hugo", "Dante Alighieri"], a: 1, d: "Fácil" },
+    { t: "Qual pintor cortou a própria orelha?", options: ["Picasso", "Van Gogh", "Monet", "Dali"], a: 1, d: "Média" },
+    { t: "Quem é o autor de 'O Senhor dos Anéis'?", options: ["J.K. Rowling", "George R.R. Martin", "J.R.R. Tolkien", "C.S. Lewis"], a: 2, d: "Média" },
+    { t: "A 'Última Ceia' é uma pintura de:", options: ["Michelangelo", "Rafael", "Leonardo da Vinci", "Donatello"], a: 2, d: "Média" },
+
+    // --- CULTURA POP E FILMES ---
+    { t: "Qual o nome do leão no filme 'O Rei Leão'?", options: ["Mufasa", "Simba", "Scar", "Timão"], a: 1, d: "Fácil" },
+    { t: "Em 'Star Wars', quem é o pai de Luke Skywalker?", options: ["Obi-Wan", "Yoda", "Darth Vader", "Han Solo"], a: 2, d: "Fácil" },
+    { t: "Qual fruta a Branca de Neve morde?", options: ["Pera", "Uva", "Maçã", "Laranja"], a: 2, d: "Fácil" },
+    { t: "Qual o nome da cidade do Batman?", options: ["Metrópolis", "Gotham City", "Star City", "Central City"], a: 1, d: "Fácil" },
+    { t: "Quem dirigiu o filme 'Titanic'?", options: ["Steven Spielberg", "Quentin Tarantino", "James Cameron", "Martin Scorsese"], a: 2, d: "Difícil" },
+    { t: "Qual é a identidade secreta do Homem de Ferro?", options: ["Bruce Wayne", "Clark Kent", "Peter Parker", "Tony Stark"], a: 3, d: "Fácil" },
+
+    // --- ESPORTES E JOGOS ---
+    { t: "Qual peça do xadrez pode andar em 'L'?", options: ["Torre", "Bispo", "Cavalo", "Rainha"], a: 2, d: "Média" },
+    { t: "Quantos anéis tem a bandeira olímpica?", options: ["4", "5", "6", "7"], a: 1, d: "Fácil" },
+    { t: "Em qual esporte se usa o termo 'Home Run'?", options: ["Basquete", "Futebol Americano", "Beisebol", "Hóquei"], a: 2, d: "Média" },
+    { t: "Qual país ganhou a Copa do Mundo de 2002?", options: ["Alemanha", "França", "Brasil", "Itália"], a: 2, d: "Média" },
+
+    // --- CONHECIMENTOS GERAIS ---
+    { t: "Qual é a moeda usada no Japão?", options: ["Dólar", "Yuan", "Iene", "Won"], a: 2, d: "Média" },
+    { t: "Quantos meses têm 28 dias?", options: ["1 (Fevereiro)", "6", "Todos os 12", "Nenhum"], a: 2, d: "Difícil" }, // (Pegadinha: Todos os meses têm pelo menos 28 dias)
+    { t: "O que é um 'Sommelier'?", options: ["Especialista em vinhos", "Tipo de queijo", "Instrumento musical", "Especialista em café"], a: 0, d: "Média" },
+    { t: "Qual destes instrumentos é de corda?", options: ["Flauta", "Trompete", "Violino", "Bateria"], a: 2, d: "Fácil" },
+    { t: "O que comemora-se no dia 25 de Dezembro?", options: ["Páscoa", "Natal", "Ano Novo", "Corpus Christi"], a: 1, d: "Fácil" },
+    { t: "Qual animal é o Pateta da Disney?", options: ["Gato", "Rato", "Cachorro", "Cavalo"], a: 2, d: "Fácil" },
+    { t: "Misturando vermelho e branco, qual cor se obtém?", options: ["Roxo", "Laranja", "Rosa", "Cinza"], a: 2, d: "Fácil" },
+    { t: "Quantas patas tem uma aranha?", options: ["4", "6", "8", "10"], a: 2, d: "Fácil" },
+    { t: "Qual santo é festejado em junho com fogueiras?", options: ["São Pedro", "Santo Antônio", "São João", "Todos os anteriores"], a: 3, d: "Média" },
+    { t: "O que significa a sigla 'CEP'?", options: ["Código de Endereçamento Postal", "Companhia de Entrega Pessoal", "Centro de Estado Postal", "Código de Entrega Preferencial"], a: 0, d: "Média" }
+        ];
+
+
             // ... (Pode adicionar mais perguntas aqui)
         ];
         // Adicionei algumas repetidas para teste rápido, na versão final use as 50+
