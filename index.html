@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiz Show PRO</title>
+    <title>Quiz Show PRO Final</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
@@ -18,21 +18,34 @@
             --red-btn: #ff4757;
             --green-btn: #2ed573;
             --gold: #ffd700;
-            --danger: #ff6b6b;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); color: var(--text); height: 100vh; width: 100vw; overflow: hidden; display: flex; flex-direction: column; }
 
         /* --- LAYOUTS --- */
-        .screen { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: var(--bg); z-index: 1; }
+        .screen { display: none; flex-direction: column; width: 100%; height: 100%; position: absolute; top: 0; left: 0; background: var(--bg); z-index: 2; }
         .screen.active { display: flex; }
+
+        /* --- HEADER JUIZ --- */
+        .judge-header {
+            padding: 10px 15px; background: rgba(0,0,0,0.6); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border);
+        }
+        .switch-container { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
+        
+        /* Switch CSS */
+        .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(20px); }
 
         /* --- SCOREBOARD --- */
         .scoreboard {
-            display: flex; justify-content: space-between; padding: 10px 20px;
-            background: rgba(0,0,0,0.5); border-bottom: 1px solid var(--glass-border);
-            font-weight: bold; font-size: 1.2rem;
+            display: flex; justify-content: space-around; padding: 10px;
+            background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--glass-border);
+            font-weight: bold; font-size: 1.5rem; transition: all 0.3s;
         }
         .score-box { display: flex; gap: 10px; align-items: center; }
         .sc-red { color: var(--red-btn); }
@@ -46,33 +59,25 @@
         .btn-judge { background: var(--primary); }
         .btn-red { background: var(--red-btn); }
         .btn-green { background: var(--green-btn); }
-        
-        .switch-container { display: flex; align-items: center; justify-content: space-between; margin: 15px 0; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; }
-        .switch { position: relative; display: inline-block; width: 50px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--accent); }
-        input:checked + .slider:before { transform: translateX(26px); }
 
-        /* --- JUIZ SCREEN --- */
-        .judge-grid { display: flex; flex-direction: column; height: 100%; }
+        /* --- JUIZ CONTENT --- */
         .judge-content { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 10px; }
-        
-        .buzzer-status { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; text-align: center; font-weight: bold; font-size: 1.1rem; border: 2px solid transparent; }
+        .buzzer-status { background: rgba(255,255,255,0.05); border-radius: 10px; padding: 10px; text-align: center; font-weight: bold; font-size: 1.1rem; border: 2px solid transparent; min-height: 50px; display: flex; align-items: center; justify-content: center; }
         .timer-display { font-size: 2.5rem; text-align: center; font-weight: bold; color: var(--gold); height: 50px; }
-
-        .question-card { background: var(--glass-strong); border: 1px solid var(--glass-border); border-radius: 10px; padding: 15px; flex: 1; }
+        
+        .question-card { background: var(--glass-strong); border: 1px solid var(--glass-border); border-radius: 10px; padding: 15px; flex: 1; display: flex; flex-direction: column; }
         .q-meta { display: flex; justify-content: space-between; font-size: 0.8rem; color: #aaa; margin-bottom: 10px; text-transform: uppercase; }
-        .q-text { font-size: 1.1rem; margin-bottom: 15px; line-height: 1.4; }
+        .q-text { font-size: 1.1rem; margin-bottom: 15px; line-height: 1.4; flex-grow: 1; }
         .answer-option { background: rgba(255,255,255,0.1); padding: 10px; margin-bottom: 5px; border-radius: 6px; font-size: 0.9rem; display: flex; justify-content: space-between; }
         .answer-option.correct { border: 1px solid var(--green-btn); color: var(--green-btn); font-weight: bold; }
-        .answer-option.selected { background: rgba(255,255,255,0.3); }
+        .answer-option.selected { background: rgba(255,255,255,0.3); border-left: 4px solid var(--accent); }
 
-        .controls-area { padding: 10px; background: rgba(0,0,0,0.4); border-top: 1px solid var(--glass-border); }
+        /* --- CONTROLS AREA --- */
+        .controls-area { padding: 10px; background: rgba(0,0,0,0.8); border-top: 1px solid var(--glass-border); }
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
         .btn-grid-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .action-btn { padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; font-size: 0.8rem; cursor: pointer; }
+        .action-btn { padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; font-size: 0.8rem; cursor: pointer; transition: opacity 0.3s; }
+        .action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
         
         .btn-easy { background: #2ed573; color: #000; }
         .btn-med { background: #ffa502; color: #000; }
@@ -81,20 +86,27 @@
 
         /* --- PLAYER SCREEN --- */
         .player-content { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .big-button { width: 200px; height: 200px; border-radius: 50%; border: 8px solid rgba(255,255,255,0.3); font-size: 1.5rem; font-weight: 900; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .big-button { width: 220px; height: 220px; border-radius: 50%; border: 8px solid rgba(255,255,255,0.3); font-size: 1.5rem; font-weight: 900; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 5; }
         .big-button:active { transform: scale(0.95); }
         .btn-bg-red { background: var(--red-btn); }
         .btn-bg-green { background: var(--green-btn); }
         .big-button.locked { filter: grayscale(100%); opacity: 0.6; pointer-events: none; }
-        .celebrating { animation: pulseWin 0.8s infinite; border-color: var(--gold); box-shadow: 0 0 40px var(--gold); }
         
-        /* Modal de Pergunta no Jogador */
-        .player-q-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--glass-strong); z-index: 10; display: none; flex-direction: column; padding: 20px; }
+        /* Animações */
+        .celebrating { animation: pulseWin 0.8s infinite alternate; border-color: var(--gold); box-shadow: 0 0 50px var(--gold); }
+        @keyframes pulseWin { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+        .sad-shake { animation: shake 0.5s; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-10px); } 50% { transform: translateX(10px); } 75% { transform: translateX(-10px); } 100% { transform: translateX(0); } }
+
+        .confetti { position: absolute; width: 10px; height: 10px; background-color: #f00; animation: fall linear forwards; z-index: 10; }
+        @keyframes fall { to { transform: translateY(100vh) rotate(720deg); } }
+
+        /* Modal Player */
+        .player-q-modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--glass-strong); z-index: 20; display: none; flex-direction: column; padding: 20px; }
         .p-opt-btn { width: 100%; padding: 15px; margin-bottom: 10px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; border-radius: 8px; text-align: left; font-size: 1rem; }
         .p-opt-btn.selected { background: var(--primary); border-color: var(--accent); }
 
-        @keyframes pulseWin { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        
         /* Loading */
         #loading { position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 99; display: none; place-items: center; color: white; flex-direction: column; }
         .spinner { width: 40px; height: 40px; border: 4px solid #fff; border-top-color: var(--primary); border-radius: 50%; animation: spin 1s infinite linear; margin-bottom: 10px; }
@@ -112,12 +124,7 @@
                 <h1>QUIZ PRO <i class="fa-solid fa-brain"></i></h1>
                 <input type="text" id="roomName" placeholder="Nome da Sala (Ex: familia)" autocomplete="off">
                 <input type="text" id="playerName" placeholder="Seu Nome" autocomplete="off">
-                
-                <div class="switch-container">
-                    <span><i class="fa-solid fa-trophy"></i> Modo Placar</span>
-                    <label class="switch"><input type="checkbox" id="scoreMode"><span class="slider"></span></label>
-                </div>
-
+                <br><br>
                 <button class="role-btn btn-judge" onclick="joinGame('judge')"><i class="fa-solid fa-gavel"></i> JUIZ (Criar)</button>
                 <button class="role-btn btn-red" onclick="joinGame('red')"><i class="fa-solid fa-gamepad"></i> VERMELHO</button>
                 <button class="role-btn btn-green" onclick="joinGame('green')"><i class="fa-solid fa-gamepad"></i> VERDE</button>
@@ -126,52 +133,61 @@
     </div>
 
     <div id="screen-judge" class="screen">
-        <div class="judge-grid">
-            <div id="scoreHeaderJ" class="scoreboard" style="display:none;">
-                <div class="score-box sc-red"><i class="fa-solid fa-square"></i> <span id="sJ-red">0</span></div>
-                <div class="score-box sc-green"><i class="fa-solid fa-square"></i> <span id="sJ-green">0</span></div>
+        <div class="judge-header">
+            <div style="font-weight:bold; color:var(--accent)"><i class="fa-solid fa-wifi"></i> <span id="roomDisplay"></span></div>
+            <div class="switch-container">
+                <i class="fa-solid fa-trophy"></i> Placar
+                <label class="switch"><input type="checkbox" id="scoreToggle" onchange="game.toggleScore()"><span class="slider"></span></label>
+            </div>
+        </div>
+
+        <div id="scoreHeaderJ" class="scoreboard" style="display:none;">
+            <div class="score-box sc-red"><i class="fa-solid fa-square"></i> <span id="sJ-red">0</span></div>
+            <div class="score-box sc-green"><i class="fa-solid fa-square"></i> <span id="sJ-green">0</span></div>
+        </div>
+
+        <div class="judge-content">
+            <div id="buzzerStatus" class="buzzer-status">AGUARDANDO...</div>
+            <div id="judgeTimer" class="timer-display"></div>
+
+            <div class="question-card">
+                <div class="q-meta">
+                    <span id="qDiffDisplay">Média</span>
+                    <span id="qPointsDisplay">2 pts</span>
+                </div>
+                <div id="qText" class="q-text">Selecione uma dificuldade...</div>
+                <div id="qOptions"></div>
+            </div>
+        </div>
+
+        <div class="controls-area">
+            <div style="font-size:0.7rem; color:#aaa; margin-bottom:5px;">PRÓXIMA PERGUNTA:</div>
+            <div class="btn-grid">
+                <button class="action-btn btn-easy" onclick="game.nextQuestion('Fácil')">FÁCIL</button>
+                <button class="action-btn btn-med" onclick="game.nextQuestion('Média')">MÉDIA</button>
+                <button class="action-btn btn-hard" onclick="game.nextQuestion('Difícil')">DIFÍCIL</button>
+                <button class="action-btn btn-rand" onclick="game.nextQuestion('Random')"><i class="fa-solid fa-shuffle"></i></button>
             </div>
 
-            <div class="judge-content">
-                <div id="buzzerStatus" class="buzzer-status">AGUARDANDO...</div>
-                <div id="judgeTimer" class="timer-display"></div>
-
-                <div class="question-card">
-                    <div class="q-meta">
-                        <span id="qDiffDisplay">Média</span>
-                        <span id="qPointsDisplay">2 pts</span>
-                    </div>
-                    <div id="qText" class="q-text">Selecione uma dificuldade...</div>
-                    <div id="qOptions"></div>
-                </div>
-            </div>
-
-            <div class="controls-area">
-                <div style="font-size:0.7rem; color:#aaa; margin-bottom:5px;">PRÓXIMA PERGUNTA:</div>
-                <div class="btn-grid">
-                    <button class="action-btn btn-easy" onclick="game.nextQuestion('Fácil')">FÁCIL</button>
-                    <button class="action-btn btn-med" onclick="game.nextQuestion('Média')">MÉDIA</button>
-                    <button class="action-btn btn-hard" onclick="game.nextQuestion('Difícil')">DIFÍCIL</button>
-                    <button class="action-btn btn-rand" onclick="game.nextQuestion('Random')"><i class="fa-solid fa-shuffle"></i></button>
-                </div>
-
-                <div id="judgeActions" class="btn-grid-actions" style="opacity: 0.5; pointer-events: none;">
-                    <button class="action-btn" style="background:var(--green-btn); grid-column:span 2" onclick="game.judgeAnswer(true)">
-                        <i class="fa-solid fa-check"></i> ACERTOU (+pts)
-                    </button>
-                    <button class="action-btn" style="background:var(--red-btn)" onclick="game.judgeAnswer(false)">
-                        <i class="fa-solid fa-xmark"></i> ERROU (-pts)
-                    </button>
-                    <button class="action-btn" style="background:#444" onclick="game.anulateRound()">
-                        <i class="fa-solid fa-ban"></i> ANULAR
-                    </button>
-                    <button id="btnSendToPlayer" class="action-btn" style="background:var(--primary); grid-column:span 2" onclick="game.sendToPlayer()">
-                        <i class="fa-solid fa-mobile-screen"></i> MOSTRAR NO CELULAR
-                    </button>
-                    <button id="btnPassTurn" class="action-btn" style="background:#e67e22; display:none; grid-column:span 2" onclick="game.passTurn()">
-                        <i class="fa-solid fa-share"></i> PASSAR VEZ
-                    </button>
-                </div>
+            <div class="btn-grid-actions">
+                <button id="btnShowMobile" class="action-btn" style="background:var(--primary); grid-column:span 2" onclick="game.sendToPlayer()">
+                    <i class="fa-solid fa-mobile-screen"></i> MOSTRAR NO CELULAR
+                </button>
+                
+                <button id="btnRight" class="action-btn" style="background:var(--green-btn)" onclick="game.judgeAnswer(true)" disabled>
+                    <i class="fa-solid fa-check"></i> CERTO
+                </button>
+                <button id="btnWrong" class="action-btn" style="background:var(--red-btn)" onclick="game.judgeAnswer(false)" disabled>
+                    <i class="fa-solid fa-xmark"></i> ERRADO
+                </button>
+                
+                <button class="action-btn" style="background:#444" onclick="game.anulateRound()">
+                    <i class="fa-solid fa-ban"></i> ANULAR
+                </button>
+                
+                <button id="btnPassTurn" class="action-btn" style="background:#e67e22; display:none;" onclick="game.passTurn()">
+                    <i class="fa-solid fa-share"></i> PASSAR VEZ
+                </button>
             </div>
         </div>
     </div>
@@ -190,31 +206,31 @@
                 <i class="fa-regular fa-hand-point-up"></i>
                 APERTE
             </button>
-            <div id="pMsg" style="margin-top:20px; color:#aaa; font-weight:bold;">Aguardando...</div>
+            <div id="pMsg" style="margin-top:20px; color:#aaa; font-weight:bold; font-size:1.2rem; text-align:center; padding:0 20px;">Aguardando...</div>
 
             <div id="interactionModal" class="player-q-modal">
-                <h3 style="text-align:center; margin-bottom:20px;">Sua Resposta:</h3>
+                <h3 style="text-align:center; margin-bottom:20px;">Responda:</h3>
                 <div id="pQuestionText" style="font-size:1.1rem; margin-bottom:20px;">...</div>
-                <div id="pOptionsArea"></div>
-                <button onclick="player.confirmAnswer()" style="margin-top:auto; padding:15px; background:var(--green-btn); border:none; border-radius:10px; font-weight:bold; width:100%; color:#000;">CONFIRMAR</button>
+                <div id="pOptionsArea" style="flex:1; overflow-y:auto;"></div>
+                <button onclick="player.confirmAnswer()" style="margin-top:10px; padding:20px; background:var(--green-btn); border:none; border-radius:10px; font-weight:bold; width:100%; color:#000; font-size:1.2rem;">CONFIRMAR RESPOSTA</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- BANCO DE DADOS ---
-        // Exemplo compactado. Na prática, adicione as 1000 perguntas aqui.
+        // --- BANCO DE DADOS (1000+ Perguntas seriam aqui) ---
         const DB = [
-            { t: "Capital da França?", o: ["Paris", "Londres", "Berlim", "Roma"], a: 0, d: "Fácil" },
-            { t: "Cores da bandeira do Brasil?", o: ["Verde/Amarelo/Azul/Branco", "Verde/Vermelho", "Azul/Branco", "Verde/Branco"], a: 0, d: "Fácil" },
-            { t: "Elemento químico 'Au'?", o: ["Prata", "Ouro", "Cobre", "Alumínio"], a: 1, d: "Média" },
-            { t: "Quem pintou Guernica?", o: ["Dalí", "Picasso", "Van Gogh", "Monet"], a: 1, d: "Média" },
-            { t: "Ano da queda da Bastilha?", o: ["1789", "1800", "1500", "1990"], a: 0, d: "Difícil" },
-            { t: "Capital do Acre?", o: ["Rio Branco", "Palmas", "Macapá", "Manaus"], a: 0, d: "Média" }
+            { t: "Qual é a capital do Brasil?", o: ["Rio de Janeiro", "Brasília", "São Paulo", "Salvador"], a: 1, d: "Fácil" },
+            { t: "Quantos estados tem o Brasil?", o: ["26 + DF", "25", "27", "28"], a: 0, d: "Fácil" },
+            { t: "Quem escreveu Dom Casmurro?", o: ["Jorge Amado", "Machado de Assis", "Alencar", "Verissimo"], a: 1, d: "Média" },
+            { t: "Elemento químico 'Fe'?", o: ["Ferro", "Flúor", "Fósforo", "Frâncio"], a: 0, d: "Fácil" },
+            { t: "Em que ano ocorreu a Revolução Francesa?", o: ["1789", "1800", "1500", "1990"], a: 0, d: "Difícil" },
+            { t: "Qual o maior osso do corpo humano?", o: ["Fêmur", "Tíbia", "Úmero", "Rádio"], a: 0, d: "Média" },
+            { t: "Planeta mais próximo do Sol?", o: ["Vênus", "Terra", "Mercúrio", "Marte"], a: 2, d: "Média" }
         ];
 
-        // --- VARIAVEIS GLOBAIS ---
-        const peerPrefix = "quiz-pro-v8-";
+        // --- SISTEMA ---
+        const peerPrefix = "quiz-pro-final-v9-";
         let peer, conn, myRole;
         let connections = [];
         let timerInt;
@@ -225,31 +241,26 @@
             currentQ: null,
             locked: false,
             turn: null, // 'red' | 'green'
-            phase: 'idle', // 'idle', 'buzzed', 'passed'
-            selectedAnswerIdx: -1 // Resposta vinda do jogador
+            phase: 'idle' // 'idle', 'buzzed', 'passed'
         };
 
         // --- CONEXÃO ---
         function joinGame(role) {
             const room = document.getElementById('roomName').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
             const name = document.getElementById('playerName').value.trim();
-            const sMode = document.getElementById('scoreMode').checked;
-
             if(!room || !name) return alert("Preencha Sala e Nome!");
 
             myRole = role;
             document.getElementById('loading').style.display = 'flex';
 
             if(role === 'judge') {
-                state.scoreMode = sMode;
                 peer = new Peer(peerPrefix + room);
                 peer.on('open', () => initGame(room));
-                peer.on('error', () => { alert("Sala em uso!"); location.reload(); });
+                peer.on('error', () => { alert("Sala ocupada!"); location.reload(); });
                 peer.on('connection', c => {
                     connections.push(c);
                     c.on('data', d => handleData(d, c));
                     c.on('close', () => connections = connections.filter(x => x!==c));
-                    // Sincronizar estado inicial com quem entrou
                     c.send({ type: 'sync', scoreMode: state.scoreMode, scores: state.scores });
                 });
             } else {
@@ -269,7 +280,7 @@
             
             if(myRole === 'judge') {
                 document.getElementById('screen-judge').classList.add('active');
-                if(state.scoreMode) document.getElementById('scoreHeaderJ').style.display = 'flex';
+                document.getElementById('roomDisplay').innerText = room;
                 game.nextQuestion('Random');
             } else {
                 document.getElementById('screen-player').classList.add('active');
@@ -280,22 +291,24 @@
             }
         }
 
-        // --- LOGICA DO JUIZ ---
+        // --- LÓGICA DO JUIZ ---
         const game = {
-            nextQuestion: function(diff) {
-                // Reseta estado
-                state.phase = 'idle';
-                state.turn = null;
-                state.locked = false;
-                state.selectedAnswerIdx = -1;
-                clearInterval(timerInt);
+            toggleScore: function() {
+                state.scoreMode = document.getElementById('scoreToggle').checked;
+                const disp = state.scoreMode ? 'flex' : 'none';
+                document.getElementById('scoreHeaderJ').style.display = disp;
+                broadcast({ type: 'toggleScore', mode: state.scoreMode });
+            },
 
-                // Filtra Pergunta
+            nextQuestion: function(diff) {
+                state.phase = 'idle'; state.turn = null; state.locked = false;
+                clearInterval(timerInt);
+                
                 let pool = (diff === 'Random') ? DB : DB.filter(q => q.d === diff);
-                if(pool.length === 0) pool = DB; // Fallback
+                if(pool.length === 0) pool = DB;
                 state.currentQ = pool[Math.floor(Math.random() * pool.length)];
 
-                // UI Juiz
+                // UI
                 document.getElementById('qDiffDisplay').innerText = state.currentQ.d;
                 const pts = state.currentQ.d === 'Fácil' ? 1 : (state.currentQ.d === 'Média' ? 2 : 3);
                 document.getElementById('qPointsDisplay').innerText = pts + " PONTO(S)";
@@ -311,9 +324,9 @@
                 document.getElementById('buzzerStatus').style.color = "#fff";
                 document.getElementById('judgeTimer').innerText = "";
                 
-                // Botões de ação desativados até alguém apertar
-                document.getElementById('judgeActions').style.opacity = '0.5';
-                document.getElementById('judgeActions').style.pointerEvents = 'none';
+                // Botões de controle da rodada
+                document.getElementById('btnRight').disabled = true;
+                document.getElementById('btnWrong').disabled = true;
                 document.getElementById('btnPassTurn').style.display = 'none';
 
                 broadcast({ type: 'unlock' });
@@ -327,9 +340,9 @@
 
                 document.getElementById('buzzerStatus').innerHTML = `<span style="color:var(--${role}-btn)">${name} APERTOU!</span>`;
                 
-                // Ativa botões do juiz
-                document.getElementById('judgeActions').style.opacity = '1';
-                document.getElementById('judgeActions').style.pointerEvents = 'all';
+                // Habilita controles manuais do juiz
+                document.getElementById('btnRight').disabled = false;
+                document.getElementById('btnWrong').disabled = false;
 
                 game.startTimer(15);
                 broadcast({ type: 'lock', winner: role });
@@ -349,39 +362,58 @@
                     if(t <= 0) {
                         clearInterval(timerInt);
                         document.getElementById('judgeTimer').innerText = "TEMPO!";
-                        // Se acabar o tempo, juiz decide (Anular ou Erro)
+                        
+                        // Se for a primeira vez e acabar o tempo -> Habilita passar vez
+                        if(state.phase === 'buzzed') {
+                            document.getElementById('btnPassTurn').style.display = 'inline-block';
+                            document.getElementById('btnRight').disabled = true;
+                            document.getElementById('btnWrong').disabled = true;
+                            document.getElementById('buzzerStatus').innerText = "TEMPO ESGOTADO. PASSAR VEZ?";
+                        } else {
+                            // Se for repescagem -> Fim de papo
+                            game.anulateRound();
+                        }
                     }
                 }, 1000);
             },
 
             judgeAnswer: function(isCorrect) {
                 clearInterval(timerInt);
-                if(!state.scoreMode) {
-                    // Sem placar, apenas feedback visual
-                    broadcast({ type: 'result', correct: isCorrect });
-                    return;
-                }
-
                 const pts = state.currentQ.d === 'Fácil' ? 1 : (state.currentQ.d === 'Média' ? 2 : 3);
                 
+                // Se acertou
                 if(isCorrect) {
-                    state.scores[state.turn] += pts;
-                    game.updateScores();
-                    broadcast({ type: 'result', correct: true });
-                    // Juiz pode ir para proxima manualmente
-                } else {
-                    // Se estiver na fase 'buzzed' (primeira tentativa), desconta pontos e permite passar
-                    if(state.phase === 'buzzed') {
-                        state.scores[state.turn] -= pts;
+                    if(state.scoreMode) {
+                        state.scores[state.turn] += pts;
                         game.updateScores();
-                        broadcast({ type: 'result', correct: false, msg: "Errou! Perdeu pontos." });
-                        
-                        // Habilita botão "Passar Vez"
+                    }
+                    broadcast({ type: 'result', correct: true });
+                    document.getElementById('buzzerStatus').innerText = "RESPOSTA CERTA!";
+                    // Bloqueia botões pois acabou a rodada
+                    document.getElementById('btnRight').disabled = true;
+                    document.getElementById('btnWrong').disabled = true;
+                    document.getElementById('btnPassTurn').style.display = 'none';
+                } 
+                // Se errou
+                else {
+                    if(state.scoreMode) {
+                        // Se for primeira tentativa, perde pontos
+                        if(state.phase === 'buzzed') {
+                            state.scores[state.turn] -= pts;
+                            game.updateScores();
+                        }
+                    }
+                    
+                    broadcast({ type: 'result', correct: false, msg: "ERROU!" });
+                    
+                    if(state.phase === 'buzzed') {
+                        document.getElementById('buzzerStatus').innerText = "ERROU! PASSAR A VEZ?";
                         document.getElementById('btnPassTurn').style.display = 'inline-block';
-                        document.getElementById('buzzerStatus').innerText = "ERROU. PASSAR A VEZ?";
+                        // Desabilita certo/errado até passar a vez
+                        document.getElementById('btnRight').disabled = true;
+                        document.getElementById('btnWrong').disabled = true;
                     } else {
-                        // Fase 'passed' (segunda chance), errou, não perde nada, fim de rodada
-                        broadcast({ type: 'result', correct: false, msg: "Errou também! Ninguém pontua." });
+                        document.getElementById('buzzerStatus').innerText = "NINGUÉM PONTUOU.";
                     }
                 }
             },
@@ -390,12 +422,15 @@
                 const otherRole = state.turn === 'red' ? 'green' : 'red';
                 state.turn = otherRole;
                 state.phase = 'passed';
-                state.selectedAnswerIdx = -1; // Limpa resposta anterior
-
-                document.getElementById('buzzerStatus').innerHTML = `VEZ DE: <span style="color:var(--${otherRole}-btn)">${otherRole.toUpperCase()}</span>`;
-                document.getElementById('btnPassTurn').style.display = 'none'; // Esconde, só pode passar 1x
                 
-                // Reinicia timer para o segundo jogador
+                document.getElementById('buzzerStatus').innerHTML = `VEZ DE: <span style="color:var(--${otherRole}-btn)">${otherRole.toUpperCase()}</span>`;
+                document.getElementById('btnPassTurn').style.display = 'none'; 
+                
+                // Habilita controles para o novo jogador
+                document.getElementById('btnRight').disabled = false;
+                document.getElementById('btnWrong').disabled = false;
+
+                // Reinicia timer para o segundo jogador (10s)
                 game.startTimer(10); 
                 
                 broadcast({ type: 'pass-turn', to: otherRole });
@@ -403,12 +438,15 @@
 
             anulateRound: function() {
                 clearInterval(timerInt);
-                broadcast({ type: 'info', msg: "QUESTÃO ANULADA!" });
-                setTimeout(() => game.nextQuestion('Random'), 1500);
+                broadcast({ type: 'info', msg: "RODADA ANULADA" });
+                document.getElementById('buzzerStatus').innerText = "ANULADA. AGUARDE...";
+                setTimeout(() => game.nextQuestion('Random'), 2000);
             },
 
             sendToPlayer: function() {
-                // Envia payload da pergunta para o jogador da vez
+                // Envia para o jogador da vez (se estiver bloqueado)
+                if(!state.locked || !state.turn) return alert("Espere alguém apertar o botão!");
+                
                 const targetConn = connections.find(c => c.metadata.role === state.turn);
                 if(targetConn) {
                     targetConn.send({ 
@@ -416,46 +454,46 @@
                         q: state.currentQ.t, 
                         o: state.currentQ.o 
                     });
-                    document.getElementById('buzzerStatus').innerText = "AGUARDANDO RESPOSTA...";
+                    document.getElementById('buzzerStatus').innerText = "ENVIADO PARA CELULAR...";
                 }
+            },
+
+            receivePlayerChoice: function(idx) {
+                // AUTO-VALIDAÇÃO DO SISTEMA
+                const isCorrect = (idx === state.currentQ.a);
+                
+                // Feedback visual no juiz
+                document.querySelectorAll('.answer-option').forEach(el => el.classList.remove('selected'));
+                const el = document.getElementById(`j-opt-${idx}`);
+                if(el) el.classList.add('selected');
+
+                // Chama a função de julgamento automaticamente
+                game.judgeAnswer(isCorrect);
             },
 
             updateScores: function() {
                 document.getElementById('sJ-red').innerText = state.scores.red;
                 document.getElementById('sJ-green').innerText = state.scores.green;
                 broadcast({ type: 'score-update', scores: state.scores });
-            },
-
-            receivePlayerChoice: function(idx) {
-                // Jogador escolheu uma opção no celular
-                state.selectedAnswerIdx = idx;
-                
-                // Destaque visual no Juiz
-                document.querySelectorAll('.answer-option').forEach(el => el.classList.remove('selected'));
-                const el = document.getElementById(`j-opt-${idx}`);
-                if(el) el.classList.add('selected');
-
-                // Auto-verifica? Não, o prompt diz "o juiz diz ao sistema". 
-                // Mas para agilizar, vamos sugerir visualmente, mas o juiz clica no botão "Acerou/Errou".
-                document.getElementById('buzzerStatus').innerText = `RESPOSTA RECEBIDA: ${state.currentQ.o[idx]}`;
             }
         };
 
+        // --- MENSAGENS E EVENTOS ---
         function handleData(d, connRef) {
-            // JUIZ RECEBENDO
+            // JUIZ RECEBE
             if(myRole === 'judge') {
                 if(d.type === 'buzz') game.handleBuzz(d.role, connRef.metadata.name);
                 if(d.type === 'answer') game.receivePlayerChoice(d.idx);
             } 
-            // JOGADOR RECEBENDO
+            // JOGADOR RECEBE
             else {
                 const btn = document.getElementById('mainButton');
                 const msg = document.getElementById('pMsg');
                 const timer = document.getElementById('pTimer');
 
-                if(d.type === 'sync') {
-                    if(d.scoreMode) {
-                        document.getElementById('scoreHeaderP').style.display = 'flex';
+                if(d.type === 'sync' || d.type === 'toggleScore') {
+                    document.getElementById('scoreHeaderP').style.display = d.scoreMode ? 'flex' : 'none';
+                    if(d.scores) {
                         document.getElementById('sP-red').innerText = d.scores.red;
                         document.getElementById('sP-green').innerText = d.scores.green;
                     }
@@ -465,44 +503,63 @@
                     document.getElementById('sP-green').innerText = d.scores.green;
                 }
                 if(d.type === 'unlock') {
-                    btn.classList.remove('locked', 'celebrating');
+                    btn.classList.remove('locked', 'celebrating', 'sad-shake');
                     msg.innerText = "APERTE AGORA!"; msg.style.color = "#fff";
                     timer.innerText = "";
                     document.getElementById('interactionModal').style.display = 'none';
-                    if(timerInt) clearInterval(timerInt);
+                    player.cleanupConfetti();
                 }
                 if(d.type === 'lock') {
                     btn.classList.add('locked');
                     if(d.winner === myRole) {
                         btn.classList.add('celebrating');
                         msg.innerText = "SUA VEZ!"; msg.style.color = "var(--gold)";
+                        player.confetti();
                         if(navigator.vibrate) navigator.vibrate(200);
                     } else {
+                        btn.classList.add('sad-shake');
                         msg.innerText = "BLOQUEADO"; msg.style.color = "#aaa";
                     }
                 }
-                if(d.type === 'timer') {
-                    timer.innerText = d.val;
-                }
-                if(d.type === 'interaction') {
-                    // Abre modal de pergunta
-                    player.showInteraction(d.q, d.o);
-                }
+                if(d.type === 'timer') timer.innerText = d.val;
+                
+                if(d.type === 'interaction') player.showInteraction(d.q, d.o);
+                
                 if(d.type === 'pass-turn') {
                     if(d.to === myRole) {
                         btn.classList.add('celebrating');
-                        btn.classList.remove('locked'); // Visualmente ativo (mas o clique real não importa mais, é a resposta)
+                        btn.classList.remove('locked', 'sad-shake');
                         msg.innerText = "REPESCAGEM: SUA VEZ!"; msg.style.color = "#e67e22";
+                        player.confetti();
                         if(navigator.vibrate) navigator.vibrate([100,100,100]);
+                    } else {
+                        msg.innerText = "VEZ DO OPONENTE"; msg.style.color = "#aaa";
                     }
                 }
                 if(d.type === 'result') {
                     document.getElementById('interactionModal').style.display = 'none';
-                    msg.innerText = d.correct ? "RESPOSTA CORRETA!" : (d.msg || "RESPOSTA ERRADA");
-                    msg.style.color = d.correct ? "var(--green-btn)" : "var(--red-btn)";
+                    if(d.correct) {
+                        if(btn.classList.contains('celebrating')) {
+                            msg.innerText = "VOCÊ ACERTOU!"; msg.style.color = "var(--green-btn)";
+                        } else {
+                            msg.innerText = "OPONENTE ACERTOU"; msg.style.color = "#aaa";
+                        }
+                    } else {
+                        if(btn.classList.contains('celebrating')) {
+                            msg.innerText = "VOCÊ ERROU!"; msg.style.color = "var(--red-btn)";
+                            btn.classList.remove('celebrating');
+                            btn.classList.add('sad-shake');
+                        } else {
+                            msg.innerText = "OPONENTE ERROU"; msg.style.color = "#fff";
+                        }
+                    }
                     timer.innerText = "";
                 }
-                if(d.type === 'info') msg.innerText = d.msg;
+                if(d.type === 'info') { 
+                    msg.innerText = d.msg; 
+                    player.cleanupConfetti();
+                    document.getElementById('interactionModal').style.display = 'none';
+                }
             }
         }
 
@@ -510,12 +567,16 @@
             connections.forEach(c => c.send(msg));
         }
 
-        // --- JOGADOR LOGIC ---
+        // --- LÓGICA DO JOGADOR ---
         let selectedOption = -1;
         const player = {
             buzz: function() {
                 const btn = document.getElementById('mainButton');
-                if(btn.classList.contains('locked')) return;
+                if(btn.classList.contains('locked')) {
+                    btn.classList.add('sad-shake');
+                    setTimeout(() => btn.classList.remove('sad-shake'), 500);
+                    return;
+                }
                 conn.send({ type: 'buzz', role: myRole });
                 if(navigator.vibrate) navigator.vibrate(50);
             },
@@ -543,11 +604,22 @@
 
             confirmAnswer: function() {
                 if(selectedOption === -1) return alert("Selecione uma opção!");
-                if(confirm("Confirmar resposta?")) {
-                    conn.send({ type: 'answer', idx: selectedOption });
-                    document.getElementById('interactionModal').style.display = 'none';
-                    document.getElementById('pMsg').innerText = "Resposta enviada...";
+                conn.send({ type: 'answer', idx: selectedOption });
+                document.getElementById('pMsg').innerText = "Verificando...";
+            },
+
+            confetti: function() {
+                for(let i=0; i<30; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'confetti';
+                    c.style.left = Math.random() * 100 + 'vw';
+                    c.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                    c.style.backgroundColor = ['#f00', '#0f0', '#00f', '#ff0'][Math.floor(Math.random()*4)];
+                    document.body.appendChild(c);
                 }
+            },
+            cleanupConfetti: function() {
+                document.querySelectorAll('.confetti').forEach(e => e.remove());
             }
         };
 
