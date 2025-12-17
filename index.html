@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quiz Show PRO Final</title>
+    <title>Quiz Show PRO - UNLOCKED</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
@@ -33,7 +33,6 @@
         }
         .switch-container { display: flex; align-items: center; gap: 10px; font-size: 0.9rem; }
         
-        /* Switch CSS */
         .switch { position: relative; display: inline-block; width: 40px; height: 20px; }
         .switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: .4s; border-radius: 34px; }
@@ -47,9 +46,11 @@
             background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--glass-border);
             font-weight: bold; font-size: 1.5rem; transition: all 0.3s;
         }
-        .score-box { display: flex; gap: 10px; align-items: center; }
+        .score-box { display: flex; gap: 10px; align-items: center; cursor: pointer; padding: 5px 10px; border-radius: 5px; }
+        .score-box:active { background: rgba(255,255,255,0.1); }
         .sc-red { color: var(--red-btn); }
         .sc-green { color: var(--green-btn); }
+        .edit-hint { font-size: 0.7rem; color: #aaa; margin-left: 5px; font-weight: normal; }
 
         /* --- LOBBY --- */
         .lobby-container { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
@@ -77,7 +78,8 @@
         .btn-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 10px; }
         .btn-grid-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .action-btn { padding: 12px; border: none; border-radius: 8px; color: white; font-weight: bold; font-size: 0.8rem; cursor: pointer; transition: opacity 0.3s; }
-        .action-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+        .action-btn:disabled { opacity: 0.2; pointer-events: none; } 
+        /* Somente desabilitamos se não houver turno algum (ninguém apertou), mas se apertou, fica liberado pra sempre */
         
         .btn-easy { background: #2ed573; color: #000; }
         .btn-med { background: #ffa502; color: #000; }
@@ -142,8 +144,12 @@
         </div>
 
         <div id="scoreHeaderJ" class="scoreboard" style="display:none;">
-            <div class="score-box sc-red"><i class="fa-solid fa-square"></i> <span id="sJ-red">0</span></div>
-            <div class="score-box sc-green"><i class="fa-solid fa-square"></i> <span id="sJ-green">0</span></div>
+            <div class="score-box sc-red" onclick="game.editScore('red')" title="Clique para editar">
+                <i class="fa-solid fa-pen-to-square edit-hint"></i> <i class="fa-solid fa-square"></i> <span id="sJ-red">0</span>
+            </div>
+            <div class="score-box sc-green" onclick="game.editScore('green')" title="Clique para editar">
+                <i class="fa-solid fa-pen-to-square edit-hint"></i> <i class="fa-solid fa-square"></i> <span id="sJ-green">0</span>
+            </div>
         </div>
 
         <div class="judge-content">
@@ -170,7 +176,7 @@
             </div>
 
             <div class="btn-grid-actions">
-                <button id="btnShowMobile" class="action-btn" style="background:var(--primary); grid-column:span 2" onclick="game.sendToPlayer()">
+                <button id="btnShowMobile" class="action-btn" style="background:var(--primary); grid-column:span 2" onclick="game.sendToPlayer()" disabled>
                     <i class="fa-solid fa-mobile-screen"></i> MOSTRAR NO CELULAR
                 </button>
                 
@@ -218,7 +224,7 @@
     </div>
 
     <script>
-        // --- BANCO DE DADOS (1000+ Perguntas seriam aqui) ---
+        // --- BANCO DE DADOS (Exemplo) ---
         const DB = [
             { t: "Qual é a capital do Brasil?", o: ["Rio de Janeiro", "Brasília", "São Paulo", "Salvador"], a: 1, d: "Fácil" },
             { t: "Quantos estados tem o Brasil?", o: ["26 + DF", "25", "27", "28"], a: 0, d: "Fácil" },
@@ -230,7 +236,7 @@
         ];
 
         // --- SISTEMA ---
-        const peerPrefix = "quiz-pro-final-v9-";
+        const peerPrefix = "quiz-pro-final-v10-";
         let peer, conn, myRole;
         let connections = [];
         let timerInt;
@@ -300,6 +306,15 @@
                 broadcast({ type: 'toggleScore', mode: state.scoreMode });
             },
 
+            editScore: function(role) {
+                const current = state.scores[role];
+                const newVal = prompt(`Editar placar ${role.toUpperCase()} (Atual: ${current}):`, current);
+                if(newVal !== null && !isNaN(newVal)) {
+                    state.scores[role] = parseInt(newVal);
+                    game.updateScores();
+                }
+            },
+
             nextQuestion: function(diff) {
                 state.phase = 'idle'; state.turn = null; state.locked = false;
                 clearInterval(timerInt);
@@ -324,9 +339,10 @@
                 document.getElementById('buzzerStatus').style.color = "#fff";
                 document.getElementById('judgeTimer').innerText = "";
                 
-                // Botões de controle da rodada
+                // Botões INICIAIS desabilitados (Só até alguém apertar)
                 document.getElementById('btnRight').disabled = true;
                 document.getElementById('btnWrong').disabled = true;
+                document.getElementById('btnShowMobile').disabled = true;
                 document.getElementById('btnPassTurn').style.display = 'none';
 
                 broadcast({ type: 'unlock' });
@@ -340,9 +356,10 @@
 
                 document.getElementById('buzzerStatus').innerHTML = `<span style="color:var(--${role}-btn)">${name} APERTOU!</span>`;
                 
-                // Habilita controles manuais do juiz
+                // LIBERDADE TOTAL: Botões habilitados para sempre a partir de agora
                 document.getElementById('btnRight').disabled = false;
                 document.getElementById('btnWrong').disabled = false;
+                document.getElementById('btnShowMobile').disabled = false;
 
                 game.startTimer(15);
                 broadcast({ type: 'lock', winner: role });
@@ -362,16 +379,10 @@
                     if(t <= 0) {
                         clearInterval(timerInt);
                         document.getElementById('judgeTimer').innerText = "TEMPO!";
-                        
-                        // Se for a primeira vez e acabar o tempo -> Habilita passar vez
+                        // NÃO BLOQUEIA BOTÕES DO JUIZ! 
                         if(state.phase === 'buzzed') {
+                            document.getElementById('buzzerStatus').innerText = "TEMPO ESGOTADO! DECIDA:";
                             document.getElementById('btnPassTurn').style.display = 'inline-block';
-                            document.getElementById('btnRight').disabled = true;
-                            document.getElementById('btnWrong').disabled = true;
-                            document.getElementById('buzzerStatus').innerText = "TEMPO ESGOTADO. PASSAR VEZ?";
-                        } else {
-                            // Se for repescagem -> Fim de papo
-                            game.anulateRound();
                         }
                     }
                 }, 1000);
@@ -381,7 +392,6 @@
                 clearInterval(timerInt);
                 const pts = state.currentQ.d === 'Fácil' ? 1 : (state.currentQ.d === 'Média' ? 2 : 3);
                 
-                // Se acertou
                 if(isCorrect) {
                     if(state.scoreMode) {
                         state.scores[state.turn] += pts;
@@ -389,29 +399,20 @@
                     }
                     broadcast({ type: 'result', correct: true });
                     document.getElementById('buzzerStatus').innerText = "RESPOSTA CERTA!";
-                    // Bloqueia botões pois acabou a rodada
-                    document.getElementById('btnRight').disabled = true;
-                    document.getElementById('btnWrong').disabled = true;
-                    document.getElementById('btnPassTurn').style.display = 'none';
+                    // Opcional: Desabilitar para evitar clique duplo, ou manter livre. Vou manter livre.
                 } 
-                // Se errou
                 else {
                     if(state.scoreMode) {
-                        // Se for primeira tentativa, perde pontos
                         if(state.phase === 'buzzed') {
                             state.scores[state.turn] -= pts;
                             game.updateScores();
                         }
                     }
-                    
                     broadcast({ type: 'result', correct: false, msg: "ERROU!" });
                     
                     if(state.phase === 'buzzed') {
                         document.getElementById('buzzerStatus').innerText = "ERROU! PASSAR A VEZ?";
                         document.getElementById('btnPassTurn').style.display = 'inline-block';
-                        // Desabilita certo/errado até passar a vez
-                        document.getElementById('btnRight').disabled = true;
-                        document.getElementById('btnWrong').disabled = true;
                     } else {
                         document.getElementById('buzzerStatus').innerText = "NINGUÉM PONTUOU.";
                     }
@@ -426,13 +427,12 @@
                 document.getElementById('buzzerStatus').innerHTML = `VEZ DE: <span style="color:var(--${otherRole}-btn)">${otherRole.toUpperCase()}</span>`;
                 document.getElementById('btnPassTurn').style.display = 'none'; 
                 
-                // Habilita controles para o novo jogador
+                // Garante que botões estão ativos
                 document.getElementById('btnRight').disabled = false;
                 document.getElementById('btnWrong').disabled = false;
+                document.getElementById('btnShowMobile').disabled = false;
 
-                // Reinicia timer para o segundo jogador (10s)
                 game.startTimer(10); 
-                
                 broadcast({ type: 'pass-turn', to: otherRole });
             },
 
@@ -440,12 +440,13 @@
                 clearInterval(timerInt);
                 broadcast({ type: 'info', msg: "RODADA ANULADA" });
                 document.getElementById('buzzerStatus').innerText = "ANULADA. AGUARDE...";
-                setTimeout(() => game.nextQuestion('Random'), 2000);
+                setTimeout(() => game.nextQuestion('Random'), 1500);
             },
 
             sendToPlayer: function() {
-                // Envia para o jogador da vez (se estiver bloqueado)
-                if(!state.locked || !state.turn) return alert("Espere alguém apertar o botão!");
+                // Removemos o "if locked". Se o juiz quiser mandar, ele manda.
+                // Apenas verificamos se tem alguém na vez, senão não tem pra quem mandar.
+                if(!state.turn) return alert("Ninguém na vez (ninguém apertou ou você não passou a vez).");
                 
                 const targetConn = connections.find(c => c.metadata.role === state.turn);
                 if(targetConn) {
@@ -455,19 +456,18 @@
                         o: state.currentQ.o 
                     });
                     document.getElementById('buzzerStatus').innerText = "ENVIADO PARA CELULAR...";
+                } else {
+                    alert("Jogador " + state.turn + " desconectado?");
                 }
             },
 
             receivePlayerChoice: function(idx) {
-                // AUTO-VALIDAÇÃO DO SISTEMA
+                // AUTO-VALIDAÇÃO
                 const isCorrect = (idx === state.currentQ.a);
-                
-                // Feedback visual no juiz
                 document.querySelectorAll('.answer-option').forEach(el => el.classList.remove('selected'));
                 const el = document.getElementById(`j-opt-${idx}`);
                 if(el) el.classList.add('selected');
 
-                // Chama a função de julgamento automaticamente
                 game.judgeAnswer(isCorrect);
             },
 
@@ -480,12 +480,10 @@
 
         // --- MENSAGENS E EVENTOS ---
         function handleData(d, connRef) {
-            // JUIZ RECEBE
             if(myRole === 'judge') {
                 if(d.type === 'buzz') game.handleBuzz(d.role, connRef.metadata.name);
                 if(d.type === 'answer') game.receivePlayerChoice(d.idx);
             } 
-            // JOGADOR RECEBE
             else {
                 const btn = document.getElementById('mainButton');
                 const msg = document.getElementById('pMsg');
