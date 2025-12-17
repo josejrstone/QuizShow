@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Perguntas e Respostas - Buzzer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --secondary: #FF6584;
+            --accent: #42EADD;
+            --bg: #1a1a2e;
+            --glass: rgba(255, 255, 255, 0.1);
+            --glass-strong: rgba(20, 20, 35, 0.85);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            --text: #ffffff;
+            --red-btn: #ff4757;
+            --green-btn: #2ed573;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: radial-gradient(circle at 10% 20%, rgba(108, 99, 255, 0.2) 0%, transparent 20%),
+                              radial-gradient(circle at 90% 80%, rgba(255, 101, 132, 0.2) 0%, transparent 20%);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow: hidden; /* Evita rolagem no app */
+        }
+
+        /* Container Principal */
+        .app-container {
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        /* Telas */
+        .screen {
+            display: none;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+            animation: fadeIn 0.4s ease;
+        }
+        .screen.active { display: flex; }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* Menu / Lobby */
+        .lobby-box {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 2rem;
+            width: 100%;
+            max-width: 400px;
+            margin: auto;
+            text-align: center;
+        }
+
+        h1 { margin-bottom: 20px; font-size: 2rem; background: linear-gradient(90deg, var(--accent), var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 10px;
+            color: white;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        input:focus { outline: 2px solid var(--accent); }
+
+        .role-btn {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .role-btn:active { transform: scale(0.95); }
+        .btn-judge { background: var(--primary); color: white; }
+        .btn-red { background: var(--red-btn); color: white; }
+        .btn-green { background: var(--green-btn); color: white; }
+
+        /* Interface do JUIZ */
+        .judge-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .buzzer-status {
+            flex-grow: 1;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .buzzer-status.red-win { background: var(--red-btn); border-color: white; box-shadow: 0 0 20px var(--red-btn); }
+        .buzzer-status.green-win { background: var(--green-btn); border-color: white; box-shadow: 0 0 20px var(--green-btn); }
+
+        .question-card {
+            background: var(--glass-strong);
+            border: 1px solid var(--glass-border);
+            border-radius: 15px;
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
+        }
+
+        .q-difficulty { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: #aaa; margin-bottom: 5px; }
+        .q-text { font-size: 1.2rem; margin-bottom: 20px; line-height: 1.4; }
+        
+        .answer-option {
+            background: rgba(255,255,255,0.1);
+            padding: 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        .answer-option.correct { border: 1px solid var(--green-btn); color: var(--green-btn); font-weight: bold; }
+
+        .control-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .action-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Interface do JOGADOR */
+        .player-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .big-button {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            border: 8px solid rgba(255,255,255,0.3);
+            font-size: 2rem;
+            font-weight: 900;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            transition: all 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            text-transform: uppercase;
+        }
+        .big-button:active { transform: scale(0.95); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        
+        .btn-bg-red { background: var(--red-btn); }
+        .btn-bg-green { background: var(--green-btn); }
+        .locked { filter: grayscale(100%); opacity: 0.5; pointer-events: none; transform: scale(0.9); }
+        
+        .player-status {
+            margin-top: 30px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            min-height: 1.5em;
+        }
+
+        /* Modal de Loading */
+        #loading-overlay {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: rgba(0,0,0,0.9); z-index: 100;
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+        }
+        .spinner { width: 40px; height: 40px; border: 4px solid #fff; border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div id="loading-msg">Conectando...</div>
+    </div>
+
+    <div class="app-container">
+        
+        <div id="screen-lobby" class="screen active">
+            <div class="lobby-box">
+                <h1><i class="fa-solid fa-bolt"></i> QUIZ SHOW</h1>
+                <p style="margin-bottom: 20px; opacity: 0.7;">Perguntas e Respostas</p>
+                
+                <input type="text" id="roomName" placeholder="Nome da Sala (Ex: familia)" autocomplete="off">
+                <input type="text" id="playerName" placeholder="Seu Nome" autocomplete="off">
+                
+                <div style="margin-top: 20px;">
+                    <button class="role-btn btn-judge" onclick="joinGame('judge')">
+                        <i class="fa-solid fa-gavel"></i> SOU O JUIZ
+                    </button>
+                    <button class="role-btn btn-red" onclick="joinGame('red')">
+                        <i class="fa-solid fa-hand-point-up"></i> BOTÃO VERMELHO
+                    </button>
+                    <button class="role-btn btn-green" onclick="joinGame('green')">
+                        <i class="fa-solid fa-hand-point-up"></i> BOTÃO VERDE
+                    </button>
+                </div>
+                <p style="font-size: 0.8rem; margin-top: 15px; opacity: 0.5;">
+                    Certifique-se de que todos usem o <strong>mesmo nome de sala</strong>.
+                </p>
+            </div>
+        </div>
+
+        <div id="screen-judge" class="screen">
+            <div class="judge-header">
+                <span><i class="fa-solid fa-wifi"></i> Sala: <b id="displayRoomJudge">...</b></span>
+                <span id="judgeConnectionStatus" style="font-size:0.8rem; color:var(--accent);">Aguardando jogadores...</span>
+            </div>
+
+            <div id="buzzerDisplay" class="buzzer-status">
+                AGUARDANDO...
+            </div>
+
+            <div class="question-card">
+                <div>
+                    <div id="qDiff" class="q-difficulty">Dificuldade: Média</div>
+                    <div id="qText" class="q-text">Carregando pergunta...</div>
+                    <div id="qOptions">
+                        </div>
+                </div>
+            </div>
+
+            <div class="control-bar">
+                <button class="action-btn" style="background: #555;" onclick="game.nextQuestion()">
+                    <i class="fa-solid fa-forward"></i> Pular/Próxima
+                </button>
+                <button class="action-btn" style="background: var(--accent); color: #000;" onclick="game.resetBuzzers()">
+                    <i class="fa-solid fa-unlock"></i> RESETAR BOTÕES
+                </button>
+            </div>
+        </div>
+
+        <div id="screen-player" class="screen">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h2 id="playerRoleDisplay">JOGADOR</h2>
+                <div style="font-size: 0.8rem; opacity: 0.7;">Sala: <span id="displayRoomPlayer"></span></div>
+            </div>
+
+            <div class="player-area">
+                <button id="mainButton" class="big-button locked" onmousedown="playerBuzz()" ontouchstart="playerBuzz()">
+                    <i class="fa-regular fa-hand-point-up" style="font-size: 3rem; margin-bottom: 10px;"></i>
+                    APERTE!
+                </button>
+                <div id="playerStatus" class="player-status">Aguardando Juiz...</div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // --- BANCO DE DADOS DE PERGUNTAS (50 Exemplos) ---
+        const questionsDB = [
+            { t: "Qual é a capital do estado do Tocantins?", options: ["Palmas", "Belém", "Goiânia", "Macapá"], a: 0, d: "Fácil" },
+            { t: "Quem escreveu 'Dom Casmurro'?", options: ["Jorge Amado", "Machado de Assis", "Clarice Lispector", "Monteiro Lobato"], a: 1, d: "Fácil" },
+            { t: "Qual moeda era utilizada no Brasil antes do Real?", options: ["Cruzeiro Real", "Cruzado", "Cruzeiro", "Todas as anteriores"], a: 3, d: "Média" },
+            { t: "Quantos estados tem o Brasil?", options: ["26 + DF", "25 + DF", "27 + DF", "26"], a: 0, d: "Fácil" },
+            { t: "Qual é o maior planeta do Sistema Solar?", options: ["Terra", "Marte", "Júpiter", "Saturno"], a: 2, d: "Fácil" },
+            { t: "Em que ano ocorreu a Proclamação da República no Brasil?", options: ["1822", "1889", "1964", "1500"], a: 1, d: "Média" },
+            { t: "Qual é o elemento químico representado pela letra O?", options: ["Ouro", "Oxigênio", "Ósmio", "Prata"], a: 1, d: "Fácil" },
+            { t: "Qual destas bandas NÃO é brasileira?", options: ["Legião Urbana", "Paralamas do Sucesso", "Maná", "Skank"], a: 2, d: "Fácil" },
+            { t: "Quem pintou 'Abaporu'?", options: ["Tarsila do Amaral", "Anita Malfatti", "Di Cavalcanti", "Cândido Portinari"], a: 0, d: "Média" },
+            { t: "Qual é o rio mais extenso do mundo?", options: ["Rio Nilo", "Rio Amazonas", "Rio Mississipi", "Rio Yangtzé"], a: 1, d: "Média" },
+            { t: "O que comemora-se no dia 7 de Setembro?", options: ["Proclamação da República", "Dia do Trabalho", "Independência do Brasil", "Dia da Bandeira"], a: 2, d: "Fácil" },
+            { t: "Qual a fórmula química da água?", options: ["H2O", "CO2", "O2", "NaCl"], a: 0, d: "Fácil" },
+            { t: "Quem foi o primeiro presidente do Brasil?", options: ["Getúlio Vargas", "Deodoro da Fonseca", "Prudente de Morais", "Floriano Peixoto"], a: 1, d: "Média" },
+            { t: "Qual é o coletivo de lobos?", options: ["Matilha", "Rebanho", "Cardume", "Manada"], a: 0, d: "Fácil" },
+            { t: "Onde fica o Monte Roraima?", options: ["Divisa Brasil/Venezuela/Guiana", "Divisa Brasil/Argentina", "Minas Gerais", "Amazonas"], a: 0, d: "Difícil" },
+            { t: "Quantos ossos tem o corpo humano adulto?", options: ["206", "300", "150", "210"], a: 0, d: "Média" },
+            { t: "Quem descobriu o Brasil?", options: ["Cristóvão Colombo", "Pedro Álvares Cabral", "Vasco da Gama", "Américo Vespúcio"], a: 1, d: "Fácil" },
+            { t: "Qual o nome popular do cloreto de sódio?", options: ["Açúcar", "Sal de cozinha", "Vinagre", "Bicarbonato"], a: 1, d: "Média" },
+            { t: "Em qual região fica o estado da Bahia?", options: ["Norte", "Sudeste", "Centro-Oeste", "Nordeste"], a: 3, d: "Fácil" },
+            { t: "Qual personagem da Turma da Mônica não gosta de banho?", options: ["Cebolinha", "Mônica", "Cascão", "Magali"], a: 2, d: "Fácil" },
+            { t: "Qual a montanha mais alta do Brasil?", options: ["Pico da Neblina", "Pico da Bandeira", "Monte Roraima", "Pico do Paraná"], a: 0, d: "Difícil" },
+            { t: "Que país sediou a Copa do Mundo de 2014?", options: ["África do Sul", "Brasil", "Alemanha", "Rússia"], a: 1, d: "Fácil" },
+            { t: "O que é um 'brotinho' na gíria antiga?", options: ["Uma planta pequena", "Uma moça bonita", "Um pão pequeno", "Um tipo de doce"], a: 1, d: "Difícil" },
+            { t: "Qual é a cor da caixa preta do avião?", options: ["Preta", "Laranja", "Vermelha", "Azul"], a: 1, d: "Média" },
+            { t: "Quantos segundos há em duas horas?", options: ["3600", "7200", "6000", "120"], a: 1, d: "Média" },
+            { t: "Quem é o Rei do Futebol?", options: ["Maradona", "Zico", "Pelé", "Ronaldo"], a: 2, d: "Fácil" },
+            { t: "O que significa a sigla ONU?", options: ["Organização Não Universal", "Organização das Nações Unidas", "Obras Nacionais Unidas", "Ordem Natural Universal"], a: 1, d: "Fácil" },
+            { t: "Qual animal representa o símbolo da medicina?", options: ["Cobra", "Leão", "Águia", "Cachorro"], a: 0, d: "Média" },
+            { t: "Em qual continente fica o Egito?", options: ["Ásia", "África", "Europa", "América"], a: 1, d: "Fácil" },
+            { t: "Qual é a raiz quadrada de 144?", options: ["10", "11", "12", "14"], a: 2, d: "Média" },
+            { t: "Quem foi Ayrton Senna?", options: ["Jogador de futebol", "Piloto de F1", "Cantor", "Ator"], a: 1, d: "Fácil" },
+            { t: "Qual destes é um mamífero que bota ovo?", options: ["Ornitorrinco", "Morcego", "Baleia", "Canguru"], a: 0, d: "Difícil" },
+            { t: "Qual é a capital dos Estados Unidos?", options: ["Nova York", "Los Angeles", "Washington D.C.", "Miami"], a: 2, d: "Fácil" },
+            { t: "O que é 'caju'?", options: ["Fruta", "Pseudofruto", "Legume", "Raiz"], a: 1, d: "Difícil" },
+            { t: "Quantos lados tem um hexágono?", options: ["5", "6", "7", "8"], a: 1, d: "Fácil" },
+            { t: "Quem inventou o avião (segundo os brasileiros)?", options: ["Irmãos Wright", "Santos Dumont", "Leonardo da Vinci", "Graham Bell"], a: 1, d: "Fácil" },
+            { t: "Qual a língua falada em Angola?", options: ["Inglês", "Espanhol", "Francês", "Português"], a: 3, d: "Média" },
+            { t: "O que é Vatapá?", options: ["Dança", "Prato típico", "Cidade", "Rio"], a: 1, d: "Fácil" },
+            { t: "Qual o planeta mais próximo do Sol?", options: ["Vênus", "Mercúrio", "Terra", "Marte"], a: 1, d: "Média" },
+            { t: "Quem pintou a 'Mona Lisa'?", options: ["Michelangelo", "Leonardo da Vinci", "Donatello", "Rafael"], a: 1, d: "Fácil" },
+            { t: "Qual é o maior animal terrestre?", options: ["Elefante Africano", "Girafa", "Rinoceronte", "Hipopótamo"], a: 0, d: "Média" },
+            { t: "Em que ano o homem pisou na Lua?", options: ["1959", "1969", "1979", "1989"], a: 1, d: "Média" },
+            { t: "Qual é a capital da França?", options: ["Londres", "Berlim", "Roma", "Paris"], a: 3, d: "Fácil" },
+            { t: "Quantos jogadores tem um time de vôlei em quadra?", options: ["5", "6", "7", "11"], a: 1, d: "Média" },
+            { t: "Qual é o maior órgão do corpo humano?", options: ["Fígado", "Coração", "Pele", "Pulmão"], a: 2, d: "Média" },
+            { t: "O que significa 'baleiro' no futebol?", options: ["Goleiro ruim", "Atacante rápido", "Aquele que chuta forte", "Aquele que faz firula"], a: 3, d: "Difícil" }
+        ];
+
+        // --- LÓGICA DE REDE E JOGO ---
+        const peerPrefix = "quiz-buzzer-game-v1-"; // Prefixo para evitar conflito com outros apps no servidor público
+        let peer = null;
+        let conn = null; // Para jogadores: conexão com o juiz
+        let connections = []; // Para juiz: lista de conexões dos jogadores
+        let myRole = '';
+        let roomCode = '';
+        
+        // --- INICIALIZAÇÃO ---
+        function joinGame(role) {
+            const rInput = document.getElementById('roomName').value.trim().toLowerCase().replace(/[^a-z0-9]/g, '');
+            const pInput = document.getElementById('playerName').value.trim();
+
+            if (!rInput || !pInput) {
+                alert("Por favor, preencha o Nome da Sala e Seu Nome.");
+                return;
+            }
+
+            myRole = role;
+            roomCode = rInput;
+            const myName = pInput;
+
+            document.getElementById('loading-overlay').style.display = 'flex';
+
+            // Configuração do PeerJS
+            if (role === 'judge') {
+                // JUIZ: Cria a sala (ID específico)
+                const myPeerId = peerPrefix + roomCode;
+                peer = new Peer(myPeerId);
+                
+                peer.on('open', (id) => {
+                    startGameUI();
+                });
+
+                peer.on('error', (err) => {
+                    if(err.type === 'unavailable-id') {
+                        alert("Essa sala já tem um Juiz! Tente outro nome de sala.");
+                    } else {
+                        alert("Erro de conexão: " + err.type);
+                    }
+                    location.reload();
+                });
+
+                peer.on('connection', (c) => {
+                    connections.push(c);
+                    setupJudgeConnection(c);
+                    updateJudgeStatus();
+                });
+
+            } else {
+                // JOGADOR: Conecta na sala do Juiz
+                peer = new Peer(); // ID aleatório
+                
+                peer.on('open', (id) => {
+                    const judgeId = peerPrefix + roomCode;
+                    conn = peer.connect(judgeId, {
+                        metadata: { name: myName, role: role }
+                    });
+
+                    conn.on('open', () => {
+                        startGameUI();
+                    });
+
+                    conn.on('data', (data) => {
+                        handlePlayerMessage(data);
+                    });
+
+                    conn.on('error', (err) => {
+                        alert("Não foi possível conectar ao Juiz. Verifique o nome da sala.");
+                        location.reload();
+                    });
+                });
+            }
+        }
+
+        function startGameUI() {
+            document.getElementById('loading-overlay').style.display = 'none';
+            document.getElementById('screen-lobby').classList.remove('active');
+            
+            if (myRole === 'judge') {
+                document.getElementById('screen-judge').classList.add('active');
+                document.getElementById('displayRoomJudge').innerText = roomCode;
+                game.nextQuestion(); // Carrega primeira pergunta
+            } else {
+                document.getElementById('screen-player').classList.add('active');
+                document.getElementById('displayRoomPlayer').innerText = roomCode;
+                
+                const btn = document.getElementById('mainButton');
+                const title = document.getElementById('playerRoleDisplay');
+                
+                if (myRole === 'red') {
+                    btn.classList.add('btn-bg-red');
+                    title.innerText = "JOGADOR VERMELHO";
+                    title.style.color = "var(--red-btn)";
+                } else {
+                    btn.classList.add('btn-bg-green');
+                    title.innerText = "JOGADOR VERDE";
+                    title.style.color = "var(--green-btn)";
+                }
+            }
+        }
+
+        // --- LÓGICA DO JUIZ ---
+        function setupJudgeConnection(c) {
+            c.on('data', (data) => {
+                if (data.type === 'buzz') {
+                    game.handleBuzz(data.role, c.metadata.name);
+                }
+            });
+            c.on('close', () => {
+                connections = connections.filter(conn => conn !== c);
+                updateJudgeStatus();
+            });
+        }
+
+        function updateJudgeStatus() {
+            const red = connections.find(c => c.metadata.role === 'red');
+            const green = connections.find(c => c.metadata.role === 'green');
+            
+            let txt = [];
+            if(red) txt.push("🔴 " + red.metadata.name);
+            if(green) txt.push("🟢 " + green.metadata.name);
+            
+            const statusEl = document.getElementById('judgeConnectionStatus');
+            if(txt.length === 0) statusEl.innerText = "Ninguém conectado.";
+            else statusEl.innerText = "Conectado: " + txt.join(" | ");
+        }
+
+        // --- LÓGICA DO JOGO (JUIZ) ---
+        const game = {
+            isLocked: true, // Começa bloqueado até resetar
+            currentQuestion: null,
+
+            handleBuzz: function(role, name) {
+                if (this.isLocked) return;
+                
+                this.isLocked = true;
+                
+                // Atualiza UI Juiz
+                const display = document.getElementById('buzzerDisplay');
+                display.innerText = `${name.toUpperCase()} APERTOU!`;
+                display.className = 'buzzer-status ' + (role === 'red' ? 'red-win' : 'green-win');
+
+                // Toca som (Vibração no juiz)
+                if(navigator.vibrate) navigator.vibrate([200, 100, 200]);
+
+                // Avisa todos os jogadores quem ganhou
+                this.broadcast({ type: 'lock', winner: role });
+            },
+
+            resetBuzzers: function() {
+                this.isLocked = false;
+                
+                // UI Juiz
+                const display = document.getElementById('buzzerDisplay');
+                display.className = 'buzzer-status';
+                display.innerText = "QUEM SABE?";
+                display.style.background = "rgba(255,255,255,0.05)";
+
+                // Avisa jogadores
+                this.broadcast({ type: 'unlock' });
+            },
+
+            nextQuestion: function() {
+                // Sorteia pergunta
+                const idx = Math.floor(Math.random() * questionsDB.length);
+                this.currentQuestion = questionsDB[idx];
+
+                // Renderiza no Juiz
+                document.getElementById('qDiff').innerText = "Dificuldade: " + this.currentQuestion.d;
+                document.getElementById('qText').innerText = this.currentQuestion.t;
+                
+                const optsContainer = document.getElementById('qOptions');
+                optsContainer.innerHTML = '';
+                
+                this.currentQuestion.options.forEach((opt, index) => {
+                    const div = document.createElement('div');
+                    div.className = 'answer-option';
+                    if (index === this.currentQuestion.a) {
+                        div.classList.add('correct'); // Juiz vê a resposta certa
+                    }
+                    div.innerText = `${index + 1}. ${opt}`;
+                    optsContainer.appendChild(div);
+                });
+
+                // Reseta automaticamente os botões ou espera o juiz? 
+                // O prompt diz "O juiz terá um botão para resetar". Então não reseta auto.
+                // Mas vamos travar para evitar disparos durante a leitura.
+                this.isLocked = true;
+                this.broadcast({ type: 'wait' }); // Bloqueia todos enquanto lê
+                
+                const display = document.getElementById('buzzerDisplay');
+                display.className = 'buzzer-status';
+                display.innerText = "LEIA A PERGUNTA...";
+            },
+
+            broadcast: function(msg) {
+                connections.forEach(c => c.send(msg));
+            }
+        };
+
+        // --- LÓGICA DO JOGADOR ---
+        function playerBuzz() {
+            const btn = document.getElementById('mainButton');
+            if (btn.classList.contains('locked')) return;
+
+            // Envia sinal
+            if (conn) {
+                conn.send({ type: 'buzz', role: myRole });
+                if(navigator.vibrate) navigator.vibrate(50); // Feedback tátil
+            }
+        }
+
+        function handlePlayerMessage(data) {
+            const btn = document.getElementById('mainButton');
+            const status = document.getElementById('playerStatus');
+
+            if (data.type === 'unlock') {
+                btn.classList.remove('locked');
+                status.innerText = "APERTE AGORA!";
+                status.style.color = "#fff";
+                btn.style.opacity = "1";
+            } 
+            else if (data.type === 'lock') {
+                btn.classList.add('locked');
+                if (data.winner === myRole) {
+                    status.innerText = "VOCÊ GANHOU O DIREITO!";
+                    status.style.color = "var(--accent)";
+                    if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 100]);
+                } else {
+                    const winnerColor = data.winner === 'red' ? 'Vermelho' : 'Verde';
+                    status.innerText = `Bloqueado! ${winnerColor} apertou.`;
+                    status.style.color = "#aaa";
+                }
+            }
+            else if (data.type === 'wait') {
+                btn.classList.add('locked');
+                status.innerText = "Aguarde a pergunta...";
+                status.style.color = "#aaa";
+            }
+        }
+
+    </script>
+</body>
+</html>
